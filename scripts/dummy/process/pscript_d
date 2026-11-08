@@ -1,0 +1,6 @@
+#!/bin/bash
+#
+# dummy post script
+#
+
+echo "dummy post processing done."

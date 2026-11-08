@@ -1,0 +1,4 @@
+# get TLEs, must invoke for STaR satellite tracking
+# edit in your own STAR_HOME
+05 03 * * * (export STAR_HOME=/home/pi; $STAR_HOME/aux/getelements >/home/pi/log/star_tle.log 2>&1)
+

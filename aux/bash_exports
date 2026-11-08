@@ -1,0 +1,6 @@
+#!/bin/bash
+# example bash exports for STaR. I place these in .bash_profile
+
+export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:/lib
+export STAR_HOME=/home/pi/star
+export PYTHONPATH=$PYTHONPATH:$STAR_HOME:$STAR_HOME/main:.

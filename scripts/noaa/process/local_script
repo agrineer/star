@@ -1,0 +1,81 @@
+#!/bin/bash
+#  Copyright (C) 2020 Scott L. Williams.
+#  
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+#
+# grab the raw hrpt image, send to FTP directory and start processing script
+#
+# FIXME:check operations and write to a log
+
+FTPROOT=/var/ftp
+FTPDIR=$FTPROOT/2018-present
+SCRBARCH_DIR=/data/pi/SCRB/archive
+SCRBPROD_DIR=/data/pi/SCRB/products
+
+# adjust above for local sites
+#---------------------------------------------------------------
+
+# check number of args
+NUMARGS=$#
+if [ ! $NUMARGS -eq 2 ]
+then
+    echo "usage: local_script input_dir sattime"
+    exit 1
+fi
+
+# get hrpt filename
+INPUTPATH=$1
+SATTIME=$2
+
+# check for .hrpt file
+if [ ! -f $INPUTPATH/$SATTIME.hrpt ]
+then 
+    echo "no file: $DATAPATH/$SATTIME.hrpt"
+    exit 1
+fi
+
+# parse out dates
+YEAR=`echo $SATTIME | cut -c 9-12`
+MONTH=`echo $SATTIME | cut -c 14-15`
+DAY=`echo $SATTIME | cut -c 16-17`
+
+# copy to ftp, archive dirs
+USER=pi
+
+# attempt to make dirs; ignore errors if already made
+YEARMONTH_DIR=$YEAR\_$MONTH 
+DATA_DIR=$FTPDIR/$YEARMONTH_DIR/$DAY
+/bin/mkdir -p $DATA_DIR
+
+ARCHIVE_DIR=$SCRBARCH_DIR/$YEARMONTH_DIR/$DAY
+/bin/mkdir -p $ARCHIVE_DIR
+
+echo "copying to $DATA_DIR." 
+cp $INPUTPATH/$SATTIME.hrpt $DATA_DIR
+
+echo "moving to $ARCHIVE_DIR." 
+mv $INPUTPATH/$SATTIME.hrpt $ARCHIVE_DIR
+
+echo "invoking command hrpt_process." 
+/home/$USER/star/scripts/noaa/process/hrpt_process $DATA_DIR $SATTIME
+
+#echo "uploading to server."
+#/home/$USER/star/scripts/noaa/process/upload_noaa.py $SATTIME
+
+echo "invoking command aapp_process."
+/home/$USER/star/scripts/noaa/process/aapp_process $DATA_DIR $SATTIME 
+
+echo "done."

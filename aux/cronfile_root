@@ -1,0 +1,3 @@
+# use this if ntpdate daemon is not running
+32  * * * * /usr/sbin/ntpdate utcnist.colorado.edu
+

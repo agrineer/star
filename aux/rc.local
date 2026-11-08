@@ -1,0 +1,39 @@
+#!/bin/sh -e
+# STaR initiation at boot up. Edit in your locations
+# rc.local is not used in some Linux systems.
+#
+# rc.local
+#
+# This script is executed at the end of each multiuser runlevel.
+# Make sure that the script will "exit 0" on success or any other
+# value on error.
+#
+# In order to enable or disable this script just change the execution
+# bits.
+#
+
+# use this if ntpdate daemon is not running
+echo ""
+echo "updating time"
+/usr/sbin/ntpdate utcnist.colorado.edu
+
+# use this if using terrenus/coastwatch software
+echo ""
+echo "updating HRPT tle"
+/home/pi/star/aux/getelements_terrenus
+
+echo ""
+echo "updating STaR tle"
+/bin/su - pi -c "/home/pi/star/aux/getelements"
+
+# use this if using AAPP software
+echo ""
+echo "updating  AAPP tle"
+/bin/su - pi -c "(export AAPP_PREFIX=/home/pi/AAPP_8.5/install/AAPP_8.5; $AAPP_PREFIX/AAPP/bin/get_tle > /home/pi/log/aapp_tle.log 2>&1)"
+
+#echo ""
+#echo "creating ram disk"
+#mount -t tmpfs -o size=16000M tmpfs /mnt/tmpfs.ramdisk
+#chown pi.pi -R /mnt/tmpfs.ramdisk/
+
+exit 0

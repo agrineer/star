@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# directory for two line elements 
+TLE_DIR=$STAR_HOME/orbits
+cd $TLE_DIR
+
+# get latest weather satellite Two Line Elements (TLE)
+/bin/mv -f weather.txt weather.txt.OLD
+/usr/bin/wget http://celestrak.com/NORAD/elements/weather.txt
+
+# if file not retrieved put back saved copy
+if [ -f "weather.txt" ]
+then
+	echo "weather.txt found."
+else
+	echo "weather.txt not found. using old file." 
+	mv weather.txt.OLD weather.txt
+fi
