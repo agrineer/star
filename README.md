@@ -1,5 +1,5 @@
 ## Description
-Satellite Track and Read (STaR) is a general satellite scheduling and tracking program with modular motion control and signal processing for polar orbiting direct broadcast satellites. Agrineer's STaR runs on Gnu/Linux platforms. Originally designed for older generation NOAA/METOP satellites the package is now transitioning to current platforms.
+Satellite Track and Read (STaR) is a general satellite scheduling and tracking program with modular motion control and signal processing for polar orbiting direct broadcast satellites. Agrineer's STaR runs on GNU/Linux platforms. Originally designed for older generation NOAA/METOP satellites the package is now transitioning to current platforms.
 
 The star project is being developed as an educational package for student agricultural data scientists and engineers, giving a hands-on experience on how remote-sensing data is acquired, processed, and implemented for agricultural purposes. STaR signal processing programs yield Level 0 packets using GnuRadio modules and addition processing is 
 provided as product processing examples, such as Albedo values, Normalized Difference Vegetation Index (NDVI), Land Surface Temperature (LST), etc. 
@@ -19,7 +19,7 @@ GnuRadio NOAA-19 HRPT acquisition signal, using a $20 receiver, shown below:
 
 ![STaR_fft](aux/images/small_STaR_fft.png)
 
-GnuRadio METOP-C AHRPT Constellation acquisition signal with same receiver, shown below:
+GnuRadio METOP-C AHRPT Constellation acquisition signal with, shown below:
 
 ![STaR_const](aux/images/small_STaR_const.png)
 

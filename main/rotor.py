@@ -25,13 +25,14 @@ Don't call directly. User must derive from this class
 and then supply motor control specifics. See examples in ../rotors.
 Load specific motion control rotor class through the configurations file.
 '''
-rotor_copyright = 'rotor.py Copyright (c) 2020 Scott L. Williams ' + \
-            'released under GNU GPL V3.0'
+rotor_copyright = 'rotor.py Copyright (c) 2020-2026 Scott L. Williams, released under GNU GPL V3.0'
 
 import os
 import sys
 import time
 import logging
+
+from ezprint import eprint, eprints
 
 # abstract class for antenna rotor. user should supply 
 # state minimal routines, init parameters and communications.
@@ -70,81 +71,67 @@ class rotor():
 
     # get rotor calibration status
     def is_calibrating( self ):
-        print('ERROR: is_calibrating: this method must be overridden',
-              file=sys.stderr,flush=True)
+        eprint('ERROR: is_calibrating: this method must be overridden' )
 
     # move to azimuth and elevation positions; override in subclass
     def move_azel( self, az, el, wait=False ):
-        print('ERROR: move_azel:this method must be overridden',
-              file=sys.stderr,flush=True)
+        eprint('ERROR: move_azel:this method must be overridden' )
 
     # read azimuth and elevation positions; override in subclass
     def get_azel( self  ):
-        print('ERROR: read_azel:this method must be overridden',
-              file=sys.stderr,flush=True)
+        eprint('ERROR: read_azel:this method must be overridden' )
         return None,None
 
     # move to azimuth position; override in subclass
     def move_az( self, az ):
-        print('ERROR: move_az:this method must be overridden',
-              file=sys.stderr,flush=True)
+        eprint('ERROR: move_az:this method must be overridden' )
 
     # read azimuth position; override in subclass
     def read_az( self  ):
-        print('ERROR: read_az:this method must be overridden',
-              file=sys.stderr,flush=True)
+        eprint('ERROR: read_az:this method must be overridden' )
         return None
 
     # move to elevation position; override in subclass
     def move_el( self, el ):
-        print('ERROR: move_el:this method must be overridden',
-              file=sys.stderr,flush=True)
+        eprint('ERROR: move_el:this method must be overridden' )
 
     # read elevation position; override in subclass
     def read_el( self ):
-        print('ERROR: read_el:this method must be overridden',
-              file=sys.stderr,flush=True)
+        eprint('ERROR: read_el:this method must be overridden' )
         return None
 
     # calibrate rotor motion control; override in subclass
     def initialize( self ):
-        print('ERROR: initilaize:this method must be overridden',
-              file=sys.stderr,flush=True)
+        eprint('ERROR: initilaize:this method must be overridden' )
         return None
 
     # get rotor motion control status; override in subclass
     def status( self ):
-        print('ERROR: status:this method must be overridden',
-              file=sys.stderr,flush=True)
+        eprint('ERROR: status:this method must be overridden' )
         return None, None, None
 
     # open rotor control
     def open( self ):
-        print('ERROR: open:this method must be overridden',
-              file=sys.stderr,flush=True)
+        eprint('ERROR: open:this method must be overridden' )
         return None
 
     # close rotor control
     def close( self ):
-        print('ERROR: close:this method must be overridden',
-              file=sys.stderr,flush=True)
+        eprint('ERROR: close:this method must be overridden' )
         return None
 
     # unwrap antenna wire
     def unwrap( self ):
-        print('ERROR: unwrap:this method must be overridden',
-              file=sys.stderr,flush=True)
+        eprint('ERROR: unwrap:this method must be overridden' )
 
     # report rotor information
     def get_info( self ):
-        print('ERROR: get_info:this method must be overridden',
-              file=sys.stderr,flush=True)
+        eprint('ERROR: get_info:this method must be overridden' )
         return 'get_info:information not available'
 
     # return rotor tracker 
     def get_tracker( self, coord ):
-        print('ERROR: get_tracker:this method must be overridden',
-              file=sys.stderr,flush=True)
+        eprint('ERROR: get_tracker:this method must be overridden' )
 
 ############################################################################
 
@@ -154,7 +141,7 @@ class rotor():
     def park( self ):
 
         logging.info( 'parking antenna...' )
-        print( 'parking antenna...', end='', file=sys.stderr, flush=True )
+        eprints( 'parking antenna...' )
         self.move_azel( self.az_park, self.el_park )
         logging.info( 'antenna parked' )
-        print( 'done.', file=sys.stderr, flush=True )
+        eprint( 'done.' )

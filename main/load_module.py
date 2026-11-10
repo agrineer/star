@@ -23,8 +23,7 @@
 Dynamically loads a rotor module specified in the configuration file.
 '''
 
-load_module_copyright = 'load_module.py Copyright (c) 2020 Scott L. Williams '+ \
-            'released under GNU GPL V3.0'
+load_module_copyright = 'load_module.py Copyright (c) 2020-2026 Scott L. Williams, released under GNU GPL V3.0'
 
 import os
 import sys
@@ -47,7 +46,7 @@ def load_module( package_path ):
                 f.close()
 
     except Exception as e:  # TODO: find correct error exception
-        print('load_module: ', e, file=sys.stderr, flush=True)
+        eprint('load_module: ', e )
 
 # end load_module
         

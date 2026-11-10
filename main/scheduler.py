@@ -24,8 +24,7 @@ Trigger tracking and signal read for satellite rise and set events by
 predicting satellite passes using the "ephem" package.
 '''
 
-scheduler_copyright = 'scheduler.py Copyright (c) 2020 Scott L. Williams ' + \
-                 'released under GNU GPL V3.0'
+scheduler_copyright = 'scheduler.py Copyright (c) 2020-2026 Scott L. Williams, released under GNU GPL V3.0'
 
 import os
 import sys
@@ -35,8 +34,9 @@ import signal
 import logging
 import subprocess
 
-from threading import Thread
 from time import *
+from ezprint import eprint
+from threading import Thread
 
 class scheduler( Thread ):
     def __init__ ( self, star ):
@@ -64,18 +64,31 @@ class scheduler( Thread ):
     # assign two line elements to a satellite
     def get_elements( self, sat ):
 
-        tle = open( sat.tlef, 'r' )   
+        #eprint( 'getting TLE for: ' + sat.name )
+        #eprint( 'using file: ' + sat.tlef )
+        
+        try:
+            tle = open( sat.tlef, 'r' )
+        except exception  as e:
+            eprint( e )
+            logging.error( 'get_elements: cannot open ' +
+                           sat.tlef + ' ... exiting' )
+            sys.exit( 1 )
+
+        # find TLEs
         line = tle.readline()
         while line:                       # use satellite name as key
             if sat.name in line:
                 sat.tle1 = tle.readline() # load values  
                 sat.tle2 = tle.readline()
                 tle.close()
-                return                    # successful read     
+                return                    # successful read
+            
             line = tle.readline()
-
+            
+        logging.error( 'get_elements: cannot find TLEs for ' + sat.name +
+                       ' in file: ' + sat.tlef + ' ... exiting.')
         tle.close()
-        logging.error( 'get_elements: cannot find TLEs for ', + sat.name + 'exiting.')
         sys.exit(1)
 
     # sort passes by time and overlaps
@@ -89,8 +102,7 @@ class scheduler( Thread ):
             passes.sort( key=lambda x:x[0][1] )  
         except:
             # FIXME: keep this here to debug sort exception; considered fixed
-            print( 'HELP',  num, len( passes[0]),
-                   file=sys.stderr, flush=True)
+            eprint( 'HELP',  num, len( passes[0]) )
             sys.exit(1)
 
         # check for overlap passes

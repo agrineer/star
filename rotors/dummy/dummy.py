@@ -24,8 +24,7 @@ A dummy rotor for STaR. Exercises STaR for testing purposes. Can also
 write satellite track position to file.
 '''
 
-dummy_copyright = 'dummy.py Copyright (c) 2014-2020 Planetary Imaging ' + \
-                  'released under GNU GPL V3.0'
+dummy_copyright = 'dummy.py Copyright (c) 2020-2026 Scott L. Williams, released under GNU GPL V3.0'
 
 import sys
 import time
@@ -33,6 +32,7 @@ import ephem
 import logging
 
 from rotor import rotor
+from ezprint import eprint
 from threading import Thread
 
 # return an instance of 'dummy' class 
@@ -41,7 +41,8 @@ def instantiate( name, el_offset, az_offset, lead ):
     return dummy( name, el_offset, az_offset, lead )
 
 class dummy( rotor ):
-    def __init__( self, name, el_offset, az_offset, lead ):      
+    def __init__( self, name, el_offset, az_offset, lead ):
+
         rotor.__init__( self )        # initialize base class first
         self.version = '2020.000'
 

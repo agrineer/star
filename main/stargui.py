@@ -1,6 +1,6 @@
-#! /usr/bin/env /usr/bin/python3
+#!/usr/bin/env python3
 '''
-@file star.py
+@file stargui.py
 @author Scott L. Williams
 @package STaR
 @brief GUI interface for the STaR program.
@@ -25,8 +25,7 @@ A GUI interface for the Satellite Track and Read (STaR) program using a
 modular antenna motion control and signal reception approach.
 '''
 
-copyright = 'stargui.py Copyright (c) 2020 Scott L. Williams ' + \
-            'released under GNU GPL V3.0'
+copyright = 'stargui.py Copyright (c) 2020-2026 Scott L. Williams, released under GNU GPL V3.0'
 
 import os
 import wx
@@ -39,6 +38,7 @@ from load_module import load_module
 # our modules
 from star import star
 from calib import calib
+from ezprint import eprint
 from monitor import monitor
 from benchtop import benchtop
 
@@ -52,21 +52,20 @@ class stargui( wx.Frame ):    # frame container class for stargui window
         self.star = star()
         try:
             self.star.configure( config_file )
-        except:
+        except Exception as e:
+            eprint( e )
             err = 'stargui.py: configuration file given: ' + config_file \
                 + ' does not load. exiting program.'
 
             logging.error( err )
-            print( err,file=sys.stderr,flush=True)
-            print( 'check log file "star.log" for available details.',
-                   file=sys.stderr,flush=True)
-
+            eprint( err )
+            eprint( 'check log file "star.log" for available details.' )
             sys.exit(1)
 
         self.star.start()
 
         cfile = os.path.basename( config_file )
-        self.SetTitle( "Planetary Imaging's Satellite Track and Read (STaR) - " + cfile )
+        self.SetTitle( "Satellite Track and Read (STaR) - " + cfile )
         self.SetMinSize( (640,480) ) # homage to old school format
         self.SetMaxSize( (640,480) ) 
   
@@ -121,15 +120,15 @@ class stargui( wx.Frame ):    # frame container class for stargui window
         # antenna menu
         antenna_menu = wx.Menu()
 
-        ID_ANTENNA_INITIALIZE = wx.NewId()
+        ID_ANTENNA_INITIALIZE = wx.NewIdRef()
         item = antenna_menu.Append( ID_ANTENNA_INITIALIZE, "Initialize" )
         self.Bind( wx.EVT_MENU, self.on_antenna_initialize, item )
 
-        ID_ANTENNA_PARK = wx.NewId()
+        ID_ANTENNA_PARK = wx.NewIdRef()
         item = antenna_menu.Append( ID_ANTENNA_PARK, "Park" )
         self.Bind( wx.EVT_MENU, self.on_antenna_park, item )
 
-        ID_ANTENNA_INFO = wx.NewId()
+        ID_ANTENNA_INFO = wx.NewIdRef()
         item = antenna_menu.Append( ID_ANTENNA_INFO, "Info" )
         self.Bind( wx.EVT_MENU, self.on_antenna_info, item )
 
@@ -138,7 +137,7 @@ class stargui( wx.Frame ):    # frame container class for stargui window
         # help menu
         help_menu = wx.Menu()
 
-        ID_HELP_ABOUT = wx.NewId()
+        ID_HELP_ABOUT = wx.NewIdRef()
         item = help_menu.Append( ID_HELP_ABOUT, "About" )
         self.Bind( wx.EVT_MENU, self.on_about, item )
 
@@ -162,7 +161,7 @@ class stargui( wx.Frame ):    # frame container class for stargui window
         self.star.sched.stop()
         self.star.sched.join()
 
-        logging.info( 'exiting program' )
+        logging.info( 'exiting program.' )
         event.Skip()
 
     def on_quit( self, event=None ):
@@ -201,8 +200,6 @@ class stargui( wx.Frame ):    # frame container class for stargui window
 
     def on_antenna_info( self, event=None ):
         info = self.star.rotor.get_info()
-        if self.star.sched.tracking:
-            info += '\tantenna is tracking\n'
         self.message( info, 'Antenna Information', wx.ICON_INFORMATION )
         
     def message( self, text, title, icon ):
@@ -247,16 +244,12 @@ if __name__ == '__main__':   # user entry point
 
         # check if file exists; exit if not
         if not os.path.isfile( config_file ) :
-            print( 'stargui: config file: ' + 
-                   config_file + ' does not exist',
-                   file=sys.stderr,flush=True)
-            print('exiting...',file=sys.stderr,flush=True)
+            eprint( 'stargui: config file: ' + config_file +
+                    ' does not exist ... exiting.' )
             sys.exit(1)
     else:
-        print('no config file given.',
-              file=sys.stderr,flush=True)
-        print('usage:stargui.py config_file [log_file]',
-              file=sys.stderr,flush=True)
+        eprint('no config file given.' )
+        eprint('usage:stargui.py config_file [log_file]' )
         sys.exit(1)
 
     if len( sys.argv ) > 2:  # check for log file
@@ -271,7 +264,7 @@ if __name__ == '__main__':   # user entry point
                          datefmt='%y-%m-%d %H:%M:%S -',
                          level=logging.DEBUG )
 
-    logging.info( 'starting star gui version 2019.000' )
+    logging.info( 'starting star gui version 2026.000' )
     logging.info( 'configuration file: ' + config_file )
 
     app = wx.App()        

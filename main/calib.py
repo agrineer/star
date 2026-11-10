@@ -24,8 +24,7 @@ Calibrates the antenna on a different thread so that it can be monitored
 by another different thread.
 '''
 
-calib_copyright = 'calib.py Copyright (c) 2020 Scott L. Williams ' + \
-            'released under GNU GPL V3.0'
+calib_copyright = 'calib.py Copyright (c) 2020-2026 Scott L. Williams, released under GNU GPL V3.0'
 
 #  provide calibration thread for star
 from threading import Thread

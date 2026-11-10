@@ -25,13 +25,13 @@ circles indication 0,30,60,90 degrees plus the minimum elevation for reading
 and signal acquisition.
 '''
 # 
-path_panel_copyright = 'path_panel.py Copyright (c) 2020 Scott L. Williams' + \
-            'released under GNU GPL V3.0'
+path_panel_copyright = 'path_panel.py Copyright (c) 2020-2026 Scott L. Williams, released under GNU GPL V3.0'
 
 import wx
 import sys
 import math
 import logging
+from ezprint import eprint
 
 class path_panel( wx.Panel ):
     def __init__( self, benchtop, star ):
@@ -193,8 +193,7 @@ class path_panel( wx.Panel ):
         if az >= 3*math.pi/2 and az <= 2*math.pi:
             return -r*math.cos(az-3*math.pi/2)
 
-        print( 'find_x: unknown azimuth: ', az,
-               file=sys.stderr, flush=True)
+        eprint( 'find_x: unknown azimuth: ', az )
         return None
     
     def find_y( self, az, el ):
@@ -213,8 +212,7 @@ class path_panel( wx.Panel ):
         if az >= 3*math.pi/2 and az <= 2*math.pi:
             return r*math.cos(2*math.pi-az)
 
-        print( 'find_y: unknown azimuth: ', az,
-               file=sys.stderr, flush=True)
+        eprint( 'find_y: unknown azimuth: ', az )
         return None
 
     def angles2scrn( self, az, el ):
@@ -234,12 +232,16 @@ class path_panel( wx.Panel ):
         return px, py
     
     def plot_circle( self, dc, color, elev ):
+
         dc.SetPen( wx.Pen(color) )            # built in circle generator
         dc.SetBrush( wx.TRANSPARENT_BRUSH )   # makes better circles than below
 
         sx,sy = self.angles2scrn( 90.0, elev )        # get radius to use
         sizex,sizey = self.canvas.GetClientSize()     # calculate origin
-        dc.DrawCircle( sizex/2, sizey/2, sx-sizex/2 ) 
+
+        dc.DrawCircle( int(sizex/2),
+                       int(sizey/2),
+                       int(sx-sizex/2) )
 
     def set_pass( self, coord ):
         self.coord = coord
@@ -279,7 +281,11 @@ class path_panel( wx.Panel ):
         #dc.SetLogicalFunction( wx.XOR )
 
         dc.DrawLine( x-size, y, x+size, y )  
-        dc.DrawLine( x, y-size, x, y+size )  
+        dc.DrawLine( x, y-size, x, y+size )
+
+        # draw line to center
+        #cx,cy = self.angles2scrn( 0.0,90.0 )
+        #dc.DrawLine( cx, cy, x, y )  
 
     def update_pos( self ):
         az,el = self.rotor.get_azel()

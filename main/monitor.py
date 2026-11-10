@@ -23,8 +23,7 @@
 Monitors antenna position on a separate thread.
 '''
 
-monitor_copyright = 'monitor.py Copyright (c) 2020 Scott L. Williams ' + \
-            'released under GNU GPL V3.0'
+monitor_copyright = 'monitor.py Copyright (c) 2020-2026 Scott L. Williams, released under GNU GPL V3.0'
 
 #  provide monitor thread for star
 
@@ -60,8 +59,7 @@ class monitor( Thread ):
               wx.CallAfter( self.stargui.benchtop.update_messages, '  ' + line )
               line = file.readline()
         except:
-            print( 'report_messages: log file i/o error',
-                   file=sys.stderr, flush=True)
+            eprint( 'report_messages: log file i/o error' )
 
     def report_status( self ):
         tracking = self.stargui.star.sched.tracking

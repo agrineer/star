@@ -24,8 +24,7 @@ Top level panel for STaRgui, the graphical interface for STaR
 (Satellite Track and Read) command line program. 
 '''
 
-benchtop_copyright = 'benchtop.py Copyright (C) 2020 Scott L. Williams ' + \
-            'released under GNU GPL V3.0'
+benchtop_copyright = 'benchtop.py Copyright (C) 2020-2026 Scott L. Williams, released under GNU GPL V3.0'
 
 import os
 import wx
@@ -33,6 +32,7 @@ import sys
 import time
 import ephem
 
+from ezprint import eprint
 from path_panel import path_panel
 
 ## @todo double click on pass selection gives as much info as pyephem can give
@@ -122,8 +122,7 @@ class benchtop( wx.Panel ):
                 self.star.rotor.el_offset = float( self.el_t.GetValue() )
                 self.get_rotor_offsets()
             except:
-                print("offset input error, try again.",
-                      file=sys.syderr,flush=True)
+                eprint("offset input error, try again." )
 
         event.Skip() # pass along event
 

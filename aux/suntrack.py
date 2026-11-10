@@ -38,7 +38,7 @@ import ephem
 
 # our imports
 from suntracker import suntracker
-from load_module import load_module
+#from load_module import load_module
 
 # track the sun for antenna positioning
 class suntrack():  
