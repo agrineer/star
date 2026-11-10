@@ -90,10 +90,3 @@ get_files( 'resource', resource_sats )
 
 
 
-
-
-
-
-
-
-

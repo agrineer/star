@@ -18,3 +18,4 @@ temp/
 orbits/
 !.gitkeep
 
+__pycache__/
