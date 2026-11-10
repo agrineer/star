@@ -1,0 +1,20 @@
+# .gitignore file for STaR 
+
+# Backup files
+# Editor-specific extensions should go in your ~/.gitconfig, but we
+# include the standard Unix backup '~' extension 
+**/*~
+
+# Emacs temporary and lock files
+*~
+\#*\#
+.\#*
+
+temp/
+*.old
+*.tmp
+*~
+
+orbits/
+!.gitkeep
+
