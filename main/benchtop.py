@@ -31,6 +31,7 @@ import wx
 import sys
 import time
 import ephem
+import datetime
 
 from ezprint import eprint
 from path_panel import path_panel
@@ -51,17 +52,33 @@ class benchtop( wx.Panel ):
     # layout benchtop
     def setup_benchtop( self ):
 
+        # use equal size font
+        font = self.Parent.GetFont()
+        font.SetFamily(wx.MODERN)
+        font.SetStyle(wx.NORMAL)
+        font.SetPointSize( 9 )
+        font.SetWeight(wx.FONTWEIGHT_LIGHT)
+
         vsizer = wx.BoxSizer( wx.VERTICAL )
         vsizer.Add( (457,5) )                 # spacer
         hsizer = wx.BoxSizer( wx.HORIZONTAL ) # setup pass list and rotor panel
 
         vvsizer = wx.BoxSizer( wx.VERTICAL )
-        label = wx.StaticText( self, -1, 
-                        '  satellite           rise time                         set time                          length', size=(457,20) )
+        text = " {:14s} {:19s}  {:19s} {:5s}".format('satellite',
+                                                     'rise time',
+                                                     'set time',
+                                                     'length' )
+
+        label = wx.StaticText( self, -1, text, size=(457,20) )
+        label.SetFont( font )
         vvsizer.Add( label, 0 ) 
 
         self.passlist = wx.ListBox( self, choices=[], style=wx.LB_SINGLE,
                                     size=(457,160))
+
+        # use equal size font
+        self.passlist.SetFont(font)
+        
         self.passlist.Bind(wx.EVT_LISTBOX, self.on_select)
         vvsizer.Add( self.passlist )
         vvsizer.Add( (457,5) )
@@ -148,13 +165,19 @@ class benchtop( wx.Panel ):
             aos = ephem.localtime( passes[i][0][1] ) 
             los = ephem.localtime( passes[i][n][1] )
             diff = los-aos
+            
+            # add 1 second, an example diff outputs:0:13:29.999934
+            # want to round-up to get 0:13:30
+            diff = diff + datetime.timedelta(0,1) # days, seconds
+                                                  # then other fields.
+            name = passes[i][0][0]
+            name = f"{name:<14}"
+            aos = str(aos)[:19]
+            los = str(los)[:19]
+            diff = str(diff)[2:7]
+            text = "{:14s} {:19s}  {:19s}  {:5s}".format(name, aos, los, diff)
 
-            name = passes[i][0][0].ljust(14) # FIXME:does not line up
-            text = ' ' + name + \
-                str(aos)[:19] + \
-                '   ' + str(los)[:19] + \
-                '   ' + str(diff)[2:]
-            self.passlist.Append( text )
+            self.passlist.Append( str(text) )
             if i == 0:
                 self.stargui.mstatus.SetStatusText( text[:34], 4 )
                 self.next_pass = passes[i][0][1]

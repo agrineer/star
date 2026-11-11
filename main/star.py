@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 '''
 @file star.py
 @author Scott L. Williams
@@ -35,15 +36,16 @@ import logging
 import configparser
 from ezprint import eprint, eprints
 from threading import Thread
-#from load_module import load_module
+
 from importlib.util import spec_from_file_location, module_from_spec
 
 # our imports
 from scheduler import scheduler
 
-# ground station location
-class loc():
-    def __init__(self): 
+# ground station attribute
+class station():
+    def __init__(self):
+        
         self.name= None        # station name
         self.lat = None        # latitude
         self.lon = None        # longitude
@@ -51,7 +53,8 @@ class loc():
 
 # satellite properties
 class sat():
-    def __init__(self): 
+    def __init__(self):
+        
         self.name = None       # satellite name as given in TLEs
         self.tlef = None       # TLE file
         self.tle1 = None       # keplerian two line elements
@@ -61,8 +64,10 @@ class sat():
 
 # sets up satellite scheduler which triggers 
 # externals scripts and rotor tracking
-class star():  
+class star():
+    
     def __init__( self ):
+        
         self.update_passlist = True
         self.rotor = None
         self.sig_elev = None
@@ -71,232 +76,381 @@ class star():
         self.sats = None
         self.loc = None
         self.sched = None
+        self.myname = None
+        self.sats = None
+
+    def report_error( self, e, message ):        
+        eprint( self.myname + str(e) )
+        logging.error( e )
+
+        eprint( self.myname + message )
+        logging.error( message )
+        sys.exit( 1 )
+
+    def report_warning( self, message ):
+        eprint( self.myname + message )
+        logging.error( message )
+        sys.exit( 1 )
 
     def try_loading( self, name, path ):
 
         # fancier path joining
         mpath = os.path.join(path, f'{name}.py')
-        
-        spec = spec_from_file_location( name, mpath )
+
+        logging.info( 'locating rotor module file: ' + mpath )
+        spec = spec_from_file_location( name, mpath ) # does this throw an exception?
         if spec != None:
-
-            # If a spec was found but the file is invalid,
-            # let exceptions propagate
-            module = module_from_spec( spec )
-
+ 
             try:
+                module = module_from_spec( spec )
                 spec.loader.exec_module( module )
             except Exception as e:
-                eprint( e )
-                eprint( 'could not load module: ' + name + ' .. exiting' )
+                eprint( self.myname + e )
+                logging.error( e )
+                
+                message = 'could not load module: ' + name + ' ... exiting'
+                eprint( self.myname + message )
+                logging.error( message )
+                
                 sys.exit( 2 )
                 
-            eprint( 'dynamically loaded module: ' + name )
+            logging.info( 'dynamically loaded module: ' + name )
             return module
         
-        raise ModuleNotFoundError
+        else:
+            message = 'could not find rotor module: ' + name + ' ... exiting'
+            logging.error( message )
+            eprint( self.myname + message )
+            sys.exit( 2 )
 
+    # rotor lead time
+    def get_rotor_lead( self, config ):
+
+        try:
+            logging.info( 'getting rotor response lead time ... ' )
+            lead = config.getfloat('rotor','lead')
+
+        except:
+            message = 'rotor lead time not given, setting to lead = 1.0'
+            self.report_warning( message )
+            lead = 1.0
+            
+        logging.info( 'using rotor response time lead = ' + str( lead ) )
+
+        return lead
+        
+    # rotor azimuth offset
+    def get_rotor_azimuth_offset( self, config ):
+
+        try:
+            logging.info( 'getting rotor azimuth offset ... ')
+            az_offset = config.getfloat('rotor','az_offset')
+            
+            if az_offset < 0:
+                # TODO: really true?
+                message = 'rotor azimuth offset cannot be < 0, given: ' + \
+                          str( az_offset ) + ' setting az_offset = 0.0'
+                self.report_warning( message )
+                az_offset = 0.0
+
+            if az_offset > 10.0:
+                message = 'rotor azimuth offset is set high, given: ' + \
+                          str( az_offset ) + ' ... continuing'
+                self.report_warning( message )
+
+            logging.info( 'using rotor azimuth offset = ' + str( az_offset ) )
+            
+        except:
+            message = 'rotor azimuth offset not given, setting to az_offset = 0.0'
+            eprint( self.myname + message )
+            logging.warning( message )
+            az_offset = 0.0
+
+        return( az_offset )
+
+    # rotor elevation offset
+    def get_rotor_elevation_offset( self, config ):
+        
+        try:
+            logging.info( 'getting rotor elevation offset ... ' )
+            el_offset = config.getfloat('rotor','el_offset')
+            if el_offset < 0:
+                
+                # TODO: really true?
+                message = 'rotor elevation offset cannot be < 0, given: ' + \
+                          str(el_offset) + ' setting el_offset = 0.0'
+                self.report_warning( message )
+                el_offset = 0.0
+            
+            if el_offset > 10.0:
+                message = 'rotor elevation offset is set high, given: ' + \
+                          str(el_offset) + ' ... continuing'
+                self.report_warning( message )
+
+            logging.info( 'using rotor elevation offset = ' + str( el_offset ) )
+ 
+        except:
+            message = 'rotor elevation offset not given, setting to el_offset = 0.0'
+            self.report_warning( message )
+            el_offset = 0.0
+            
+        return el_offset
+    
     # dynamically load rotor module
     def configure_rotor( self, config_file ):
-        
-        config = configparser.RawConfigParser()
-        config.read( config_file )  
 
+        logging.info( 'configuring rotor using file: ' + config_file  )
+        
         try:
-            eprints( 'getting rotor module path ... ' )
+            config = configparser.RawConfigParser()
+            config.read( config_file )  
+
+        except Exception as e:
+            message = 'could not open rotor configure file: ' + config_file
+            self.report_error( e, message )
+         
+        try:
+            logging.info( 'getting rotor module path ... ' )
             module_path = config.get('rotor','module')
-            eprint( module_path )
-        except:
-            logging.error( 'configure_rotor: could not read module path, exiting.' )
-            sys.exit(1)
-        try:
-            eprint( 'loading rotor module' + module_path )
-            #module = load_module( module_path )
-            module = self.try_loading( 'dummy', module_path )
-        except:
-            eprint( 'could not load module: ' + module_path )
-            logging.error( 'configure_rotor: could not load module: ' + 
-                           module_path + '  exiting.' )
-            sys.exit(1)
+            logging.info( 'using module_path: ' + module_path  )
+            name = os.path.basename( module_path )
+            
+        except Exception as e:
+            message = 'could not read rotor module path: ' + \
+                       module_path + ' ... exiting.'
+            self.report_error( e, message )
+
+        name = os.path.basename( module_path )
+        logging.info( 'loading rotor module: ' + module_path )
+        
+        module = self.try_loading( 'dummy', module_path )
+        logging.info( 'using rotor module: ' + module_path  )
 
         # FIXME: check for unreasonable numbers below
 
-        try:
-            eprints( 'getting module name ... ' )
-            name = config.get('rotor','name')
-            eprint( name )
-        except:
-            logging.warning( 'configure_rotor: No rotor name given, will set to "noname".')
-            name = 'noname'
-
-        # rotor elevation offset
-        try:
-            eprints( 'getting elevation offset ... ' )
-            el_offset = config.getfloat('rotor','el_offset')
-            eprint( el_offset )
-        except: 
-            logging.warning( 'configure_rotor: rotor elevation not given, setting to el_offset=0.0')
-            el_offset = 0.0
-
-        # rotor azimuth offset
-        try:
-            eprints( 'getting azimuth offset ... ')
-            az_offset = config.getfloat('rotor','az_offset')
-            eprint( az_offset )
-        except: 
-            logging.warning( 'configure_rotor: rotor azimuth offset not given, setting to az_offset=0.0')
-            az_offset = 0.0
-
-        # rotor command lead time
-        try:
-            eprints( 'getting response lead time ... ' )
-            lead = config.getfloat('rotor','lead')
-            eprint( lead )
-        except: 
-            logging.warning( 'configure_rotor: rotor lead time not given, setting to  lead=1.0')
-            lead = 1.0
-
+        el_offset = self.get_rotor_elevation_offset( config )
+        az_offset = self.get_rotor_azimuth_offset( config )
+        lead = self.get_rotor_lead( config )
+                          
         # instantiate the rotor class with above attribute values
         try:
-            module = self.try_loading( name, module_path )
             self.rotor = module.instantiate( name, el_offset, az_offset, lead )
             
         except Exception as e:
-            logging.error( e )
-            logging.error( 'configure_rotor: could not instantiate rotor module, exiting.' )
-            sys.exit(1)
+            message( 'could not instantiate rotor module: ' + name + ' ... exiting' )
+            self.report_error( e, message )
 
-    def configure( self, config_file ):
-
-        # start configuration 
-        config = configparser.RawConfigParser()
-        config.read( config_file )
-
-        # FIXME: check for negative, unreasonable values (validate)
-
-        # read elevation to start and stop reading signal
+    # read elevation to start and stop reading signal
+    def get_read_elevation( self, config ):
+              
         try:
-            eprints( 'getting start read elev ... ' )
-            self.sig_elev = config.getfloat('satellites','sig_elev')
-            eprint( self.sig_elev )
-        except: 
-            logging.warning('No signal elevation given, setting sig_elev=15.0' )
+            logging.info( 'getting start read elevation ... ' )
+            self.sig_elev = config.getfloat( 'satellites', 'sig_elev' )
+            if self.sig_elev < 0:
+                message = 'start read elevation cannot be < 0, given: ' + \
+                          str( self.sig_elev ) + ' setting sig_elev = 15.0'
+                self.report_warning( message )
+                self.sig_elev = 15.0
+                          
+        except:
+            message = 'no read start signal elevation given, setting sig_elev = 15.0'
+            eprint( self.myname + message )
+            logging.warning( message )
             self.sig_elev = 15.0
+                          
+        logging.info( 'using start signal_elevation = ' + str( self.sig_elev ) )
 
-        # read minimum zenith threshold for satellite passes
+    # read minimum zenith threshold for satellite passes
+    def get_minimum_zenith( self, config ):
+                
         try:
-            eprints( 'getting minimum zenith threshold ... ' )
-            self.zenith_min = config.getfloat('satellites','zenith_min')
-            eprint( self.zenith_min )
-        except: 
-            logging.warning('No zenith minimum given, setting zenith_min=25.0' )
+            logging.info( 'getting minimum zenith threshold ... ' )
+            self.zenith_min = config.getfloat( 'satellites', 'zenith_min' )
+            if self.sig_elev < 0:
+                message = 'minimum elevation cannot be < 0, given: ' + \
+                           str( self.zenith_min ) + ' setting zenith_min = 25.0'
+                self.report_warning( message )
+                self.zenith_min = 25.0
+                          
+        except:
+            message = 'no zenith minimum given, setting zenith_min=25.0'
+            self.report_warning( message )
             self.zenith_min = 25.0
+            
+        logging.info( 'using zenith minimum = ' + str( self.zenith_min ) )
 
-        # read number of passes to predict per satellite
+    # read number of passes to predict per satellite
+    def get_number_passes( self, config ):
+        
         try:
-            eprints( 'getting number of passes per satellite ...' )
-            self.num_passes = int(config.getfloat('satellites','num_passes'))
-            eprint( self.num_passes )
-        except: 
-            logging.warning( 'No number of passes given, setting num_passes=3' )
+            logging.info( 'getting number of passes per satellite ...' )
+            self.num_passes = int(config.getfloat('satellites','num_passes')) # ??
+            
+        except:
+            message = 'no number of passes given, setting num_passes=3'
+            eprint( self.myname + message )
+            logging.warning( message )
             self.num_passes = 3
 
-        # read active satellites
-        try:
-            eprints( 'getting active satellites ... ' )
-            list = config.get('satellites','active')
-            active = list.split(',')
-            eprint( active )
-        except: 
-            logging.warning( 'No active satellites give, exiting' )
-            sys.exit(1)
+        logging.info( 'using number of passes per satellite = ' + str( self.num_passes ) )
 
-        # make satellite list and fill in attributes
+    # read list of active satellites
+    def get_active_satellites( self, config ):
+           
+        try:
+            logging.info( 'getting active satellites ... ' )
+            slist = config.get( 'satellites', 'active' )
+            active = slist.split( ',' )
+
+        except Exception as e:
+            message = 'could not read active satellites ...  exiting.'
+            self.report_error( e, message )
+            
+        logging.info( 'active satellites: ' + str( slist ) )
+
+        return active
+
+    # get the two line element file to read from
+    def get_tle( self, index, active, config ):
+
+        try:
+            logging.info( ' ' )
+            logging.info( 'getting TLE filename for satellite: ' +
+                          self.sats[index].name + ' ... ' )
+            
+            self.sats[index].tlef = config.get( active[index], 'tle_file' )
+                
+        except Exception as e:
+            message = 'satellite TLE file not given ... exiting.'
+            self.report_error( e, message )
+            
+        logging.info( 'using TLE file: ' + self.sats[index].tlef +
+                      ' for satellite: ' + self.sats[index].name )
+                          
+    # make satellite class array and fill in attributes
+    def populate_satellites( self, active, config ):
+        
+        logging.info( 'populating active satellite attributes ... ')
         self.sats = []
-        for i in range(0,len(active)):
+        
+        for i in range( len( active ) ):
 
             self.sats.append( sat() )
             self.sats[i].name = active[i]   
 
-            # get the two line element file to read from
+            self.get_tle( i, active, config )
+            
             try:
-                self.sats[i].tlef = config.get( active[i],'tle_file')
-            except:
-                logging.error( 'Satellite TLE file not given, exiting' )
-                sys.exit(1)
-
-            # get signal read script
+                logging.info( 'getting acquistion read signal script filename ... ' )
+                self.sats[i].read = config.get( active[i],'read_script' )
+                
+            except Exception as e:
+                message = 'no acquisition signal read script filename given for satellite: ' + \
+                          active[i] + ' ... exiting.'
+                self.report_error( e, message )
+                
+            logging.info( 'using aquisition signal read script file: ' + self.sats[i].read )
+            
             try:
-                self.sats[i].read = config.get( active[i],'read_script')
-            except:
-                logging.warning('No read script given for satellite '+active[i])
-                logging.warning('Satellite will be tracked but not read.')
+                logging.info( 'getting post acquistion processing script ... ' )
+                self.sats[i].proc = config.get( active[i], 'proc_script' )
+                
+            except Exception as e:
+                message = 'no post acquisition processing script filename given for satellite: ' + \
+                          active[i] + ' ... exiting.'
+                self.report_error( e, message )
+                
+            logging.info( 'using post acquisition processing script: ' + self.sats[i].proc  )
+            
+        logging.info( ' ' )
 
-            # get signal processing script
-            try:
-                self.sats[i].proc = config.get( active[i],'proc_script')
-            except:
-                logging.warning('No processing script given for satellite ' + active[i])
-                logging.warning('Satellite signal will not be processed.')
-
-        # get ground station location
-        self.loc = loc()
+    # get ground station attributes
+    def get_station_attributes( self, config ):
         
-        eprints( 'getting location name ... ' )
-        self.loc.name = config.get('location','name')
-        eprint( self.loc.name )
+        self.station = station()
+        
+        try:
+            logging.info( 'getting ground station name ... ' )
+            self.station.name = config.get( 'station', 'name' )
+            
+        except Exception as e:
+            message = 'ground station name not given ... exiting'
+            self.report_error( e, message )
+            
+        logging.info( 'using ground station name: ' + self.station.name )
 
-        eprints( 'getting location latitude ... ' )
-        self.loc.lat = config.get('location','latitude')
-        eprint( self.loc.lat )
+        try:
+            logging.info( 'getting ground station latitude ... ' )
+            self.station.lat = config.get( 'station', 'latitude' )
+            
+        except Exception as e:
+            message = 'ground station latitude not given ... exiting'
+            self.report_error( e, message )
+            
+        logging.info( 'using ground station latitude = ' +  self.station.lat )      
 
-        eprints( 'getting location longtitude ... ' )
-        self.loc.lon = config.get('location','longitude')
-        eprint( self.loc.lon )
+        try:
+            logging.info( 'getting ground station longtitude ... ' )
+            self.station.lon = config.get( 'station', 'longitude' )
 
-        eprints( 'getting location altitude ... ' )
-        self.loc.alt = config.getfloat('location','altitude')
-        eprint( self.loc.alt )
+        except Exception as e:
+            message = 'ground station latitude not given ... exiting'
+            self.report_error( e, message )
+            
+        logging.info( 'using ground station longitude = ' +  self.station.lon )
+
+        try:
+            logging.info( 'getting station altitude ... ' )
+            self.station.alt = config.getfloat( 'station', 'altitude' )
+            
+        except Exception as e:
+            message = 'ground station altitude not given ... exiting'
+            self.report_error( e, message )
+            
+        logging.info( 'using ground station altitude = ' +  str( self.station.alt ) )
+        logging.info( ' ' )
+        
+    def configure( self, config_file ):
+
+        logging.info( 'configuring star using file: ' + config_file )
+
+        try:
+            config = configparser.RawConfigParser()
+            config.read( config_file )  
+
+        except Exception as e:
+            message = 'could not read file: ' + config_file + ' ... exiting.'
+            self.report_error( e, message )
+
+        self.get_read_elevation( config )
+        self.get_minimum_zenith( config )
+        self.get_number_passes( config )
+        
+        active = self.get_active_satellites( config )
+
+        self.populate_satellites( active, config )
+
+        self.get_station_attributes( config )
         
         self.configure_rotor( config_file )
         self.rotor.park()
         
     def start( self ):
 
-        # report location
-        names = 'station: ' + self.loc.name +           \
-                '     antenna: ' + self.rotor.name
-
-        logging.info( names )
+        self.myname = os.path.basename(__file__)[:-3] + ': ' # no need for .py suffix
         
-        location = 'location:  lat=' + '%8.4f'%float(self.loc.lat) + \
-                   ' lon=' + '%8.4f'%float(self.loc.lon) + \
-                   ' alt=' + '%6.1f'%self.loc.alt 
-
-        logging.info( location )
-
-        # report active satellites
-        active = 'active satellites: '
-        for i in range( len(self.sats) ):
-            active += self.sats[i].name + ', '
-
-        logging.info( active[:-2] )     # removes last ', '
-
-        # report signal elevations
-        signal_elevs ='signal elevations:' + \
-                      ' zenith min = ' + '%5.1f'%self.zenith_min + \
-                      ', signal elev =' + '%5.1f'%self.sig_elev
-        
-        logging.info( signal_elevs )
+        # declare versions
+        logging.info( 'python version = ' + sys.version[0:6] )
         
         # spawn a thread to schedule AOS, LOS and rotor events
         self.sched = scheduler( self )
         self.sched.start()
 
-######################################################################         
+######################################################################
+
 if __name__ == '__main__':   # user entry point  
 
-    # FIXME: put help option
+    # FIXME: put help option, arg flags
 
     # use configuration file as argument
     if len( sys.argv ) > 1:  # check for configuration file
@@ -326,21 +480,23 @@ if __name__ == '__main__':   # user entry point
     logging.info( 'starting star command line version 2026.000' )
     logging.info( 'configuration file: ' + config_file )
 
-    star = star()
+    star = star() # instantiate non-graphics worker bee 
+    
     try:
-        eprint( 'configuring with' + config_file )
+        logging.info( 'configuring with ' + config_file )
         star.configure( config_file )
-        eprint( "CONFIGURED" )
+
     except Exception as e:
-        eprint( e )
-        err = 'star.py: configuration file given: ' + config_file +\
-              ' does not load. exiting program.'
+        message = 'check log file "star.log" for details.'
+        eprint( 'star.py: ERROR: ' + message )
+        logging.error( message )
 
-        logging.error( err )
-        eprint( err )
-        eprint('check log file "star.log" for details.' )
-        sys.exit(1)
+        message = 'star.py: configuration file given: ' + config_file + \
+                  ' does not load ... exiting'
 
+        eprint( 'star.py: ERROR: ' + message )
+        star.report_error( message )
+ 
     eprint( 'Starting star' )
     star.start()
 

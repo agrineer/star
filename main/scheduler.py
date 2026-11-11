@@ -43,7 +43,7 @@ class scheduler( Thread ):
         Thread.__init__( self )
 
         self.star = star                      # parent class
-        self.loc = star.loc                   # station location
+        self.station = star.station           # station attributes
         self.sats = star.sats                 # active satellites
         self.num_passes = star.num_passes     # number of passes per active sat
         self.rotor = star.rotor               # antenna control
@@ -63,13 +63,11 @@ class scheduler( Thread ):
 
     # assign two line elements to a satellite
     def get_elements( self, sat ):
-
-        #eprint( 'getting TLE for: ' + sat.name )
-        #eprint( 'using file: ' + sat.tlef )
-        
+       
         try:
             tle = open( sat.tlef, 'r' )
-        except exception  as e:
+            
+        except Exception  as e:
             eprint( e )
             logging.error( 'get_elements: cannot open ' +
                            sat.tlef + ' ... exiting' )
@@ -135,10 +133,10 @@ class scheduler( Thread ):
 
                 elif next_tr > tr and next_tr < ts:
 
-                    logging.info( passes[j][0][0] + ' overlaps ' + \
-                                  passes[i][0][0] + ' at ' +       \
-                                  str(ephem.localtime(next_tr))[:19]    \
-                                  + ', removed from schedule.' )
+                    logging.info( passes[j][0][0] + ' overlaps ' + 
+                                  passes[i][0][0] + ' at ' +       
+                                  str(ephem.localtime(next_tr))[:19] + 
+                                  ', removed from schedule.' )
 
                     passes.pop(j)          # remove later pass
                     num -= 1               # keep track of pops
@@ -153,9 +151,9 @@ class scheduler( Thread ):
     def predict_passes( self ):
 
         station = ephem.Observer()         # load ground station location
-        station.lat = self.loc.lat
-        station.lon = self.loc.lon
-        station.elevation = self.loc.alt   # OJO: alt and elev are swapped.
+        station.lat = self.station.lat
+        station.lon = self.station.lon
+        station.elevation = self.station.alt
         station.pressure = 0               # set pressure to zero to match
                                            # spg4 predicted rise values.
                                            # has to do with atmos refraction.

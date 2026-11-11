@@ -205,7 +205,7 @@ class stargui( wx.Frame ):    # frame container class for stargui window
     def message( self, text, title, icon ):
         dia = wx.MessageDialog( self, text, title, 
                                 style=wx.OK|icon )
-        dia.SetSize( (100,150) )
+        dia.SetSize( (200,150) )
         dia.ShowModal()
         dia.Destroy()
             

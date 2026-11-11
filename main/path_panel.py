@@ -69,7 +69,7 @@ class path_panel( wx.Panel ):
                                    style=wx.ALIGN_RIGHT,size=(35,18) )
         hsizer.Add( self.t_az, 0 )
         hsizer.Add( (23,18 ) )
-        label = wx.StaticText( self, -1, 'N', size=(10,18) )
+        label = wx.StaticText( self, -1, '  N', size=(30,18) )
         hsizer.Add( label )
         hsizer.Add( (20,18 ) )
         label = wx.StaticText( self, -1, 'el: ', size=(20,18) )
@@ -324,29 +324,24 @@ class path_panel( wx.Panel ):
 
         # draw cross in middle of panel
         cx, cy = self.angles2scrn( 0.0, 90.0 )
-        self.draw_cursor( dc, wx.BLACK, 80, cx, cy )
+        self.draw_cursor( dc, wx.Colour( 'black'), 80, cx, cy )
 
-        # set logical draw 
-        #dc.SetLogicalFunction( wx.COPY )
-
-        # plot elevation circles with minimum zenith
-        self.plot_circle( dc, wx.BLACK, 0.0 )
-        self.plot_circle( dc, wx.BLACK, 30.0 )
-        self.plot_circle( dc, wx.BLACK, 60.0 )
-        self.plot_circle( dc, wx.BLUE,  self.zenith_min )
-        self.plot_circle( dc, wx.GREEN, self.sig_elev )
-        
-        self.plot_path( dc, wx.BLUE )
+        # plot elevation circles
+        self.plot_circle( dc, wx.Colour('black'), 0.0 )
+        self.plot_circle( dc, wx.Colour('black'), 30.0 )
+        self.plot_circle( dc, wx.Colour('black'), 60.0 )
+        self.plot_circle( dc, wx.Colour('brown'), self.sig_elev )
+       
+        self.plot_path( dc, wx.Colour('blue') )
 
         # draw current rotor position
-        self.draw_cursor( dc, wx.RED, 10, self.cnv_x, self.cnv_y )
+        self.draw_cursor( dc, wx.Colour('red'), 10, self.cnv_x, self.cnv_y )
 
         if event != None:
             event.Skip()
 
     def message( self, text, title, icon ):
-        dia = wx.MessageDialog( self, text, title, 
-                                style=wx.OK|icon )
+        dia = wx.MessageDialog( self, text, title, style=wx.OK|icon )
         dia.SetSize( (100,150) )
         dia.ShowModal()
         dia.Destroy()
