@@ -118,6 +118,10 @@ class dummy_tracker( Thread ):
 
         self.num = len( self.coord )        # number of track points
 
+        # use the same logger name
+        self.logger = logging.getLogger( 'star_logger' )
+        self.logger.info( 'logger initialized in dummy track' )
+ 
     def stop( self ):
         self.running = False
 
@@ -151,14 +155,14 @@ class dummy_tracker( Thread ):
                 break
 
         if i == self.num-1:
-            self.logger.warning( 'tracker:run: pass coordinates ' +
-                             'are in the past. nothing to track. ' +
-                             'exiting tracker thread...' )
+            self.logger.warning( 'dummy_track: run: pass coordinates ' +
+                                 'are in the past. nothing to track. ' +
+                                 'exiting tracker thread...' )
             self.running = False
             return               # nothing to do
 
         # go to start position    
-        self.logger.info( 'moving antenna to rise position: ' +   \
+        self.logger.info( 'dummy_track: moving antenna to rise position: ' +   \
                           '%5.1f'%self.coord[i][2] + ' ' \
                           '%5.1f'%self.coord[i][3] )
 
@@ -170,7 +174,7 @@ class dummy_tracker( Thread ):
             while self.coord[i][1] < (ephem.now() + lead):
                i += 1
                if i == self.num:    # end of pass coordinates
-                self.logger.info( 'end of satellite pass' )
+                self.logger.info( 'dummy_track: end of satellite pass' )
                 self.clean_up()
                 return              # end of thread
 
