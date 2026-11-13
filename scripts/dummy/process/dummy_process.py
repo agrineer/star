@@ -7,8 +7,8 @@ import logging
 
 # use the same logger name
 logger = logging.getLogger( 'star_logger' )
-logger.info( 'logger initialized in dummy' )
+logger.info( 'logger initialized in dummy processing' )
   
-logger.info( 'dummy: post processing beginning ...' )
+logger.info( 'dummy process: post processing beginning ...' )
 time.sleep(5)
-logger.info( 'dummy: post processing done.')
+logger.info( 'dummy process: post processing done.')

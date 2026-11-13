@@ -50,12 +50,12 @@ class stargui( wx.Frame ):    # frame container class for stargui window
 
         self.mon_thread = None        # monitor thread
 
-        self.logger = logging.getLogger( 'star_logger' )
-
         # use command line star class
         self.star = star( log_file, config_file ) # instantiate
         self.star.start()
-
+        
+        self.logger = logging.getLogger( 'star_logger' )
+        
         cfile = os.path.basename( config_file )
         self.SetTitle( "Satellite Track and Read (STaR) - " + cfile )
         self.SetMinSize( (640,480) ) # homage to old school format
@@ -244,10 +244,11 @@ if __name__ == '__main__':   # user entry point
         eprint( 'usage:stargui.py config_file [log_file]' )
         sys.exit( 1 )
 
+    star_home = os.environ[ 'STAR_HOME' ]
     if len( sys.argv ) > 2:  # check for log file
-        log_file = sys.argv[2]
+        log_file = star_home + '/log/' + sys.argv[2]
     else:
-        log_file = 'star.log'
+        log_file = star_home + '/log/' + 'star.log'
 
     app = wx.App()        
     frame = stargui( log_file, config_file  )

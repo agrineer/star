@@ -5,14 +5,14 @@ import logging
 
 # use the same logger name
 logger = logging.getLogger( 'star_logger' )
-logger.info( 'logger initialized in read dummy' )
+logger.info( 'logger initialized in dummy read' )
 
 #
-logger.info( 'dummy: reading signal beginning ...' )
+logger.info( 'dummy read: reading signal beginning ...' )
 
 while True:
 	time.sleep(5)
 
-logger.info( 'dummy: reading signal done' )
+logger.info( 'dummy read: reading signal done' )
 
 

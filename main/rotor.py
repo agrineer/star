@@ -160,3 +160,4 @@ class rotor():
         self.logger.info( 'rotor: parking antenna...' )
         self.move_azel( self.az_park, self.el_park )
         self.logger.info( 'rotor: antenna parked' )
+        self.logger.info( ' ' )

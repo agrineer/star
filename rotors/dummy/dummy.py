@@ -46,7 +46,7 @@ class dummy( rotor ):
 
         rotor.__init__( self )        # initialize base class first
 
-        self.version = '2020.000'
+        self.version = '2026.11.14'
         self.name = name              # module's name
         
         self.el = None
@@ -61,8 +61,7 @@ class dummy( rotor ):
 
         # use the same logger name
         self.logger = logging.getLogger( 'star_logger' )
-        self.logger.info( 'using rotor ' + self.name +
-                          ' version ' + self.version )
+        self.logger.info( name + ': using ' + 'version ' + self.version )
 
         # set this up for dummy rotor only
         self.timer = 0                # used to simulate calibration

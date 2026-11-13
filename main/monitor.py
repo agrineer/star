@@ -52,6 +52,7 @@ class monitor( Thread ):
         self.logger = logging.getLogger( 'star_logger' )
 
     def report_messages( self ):
+        
         try:
           file = open( self.log_file, 'r' )      # open for read
           for i in range( self.num_messages ):   # step to valid message

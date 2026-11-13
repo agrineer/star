@@ -81,6 +81,7 @@ class star():
         # setup the logger
         self.logger = self.setup_logger( 'star_logger', log_file, False )
 
+        self.logger.info( 'star: using log file: ' + log_file )
         self.logger.info( 'star: initializing star version: 2026.000' )
         self.logger.info( 'star: python version = ' + sys.version[0:6] )
 
@@ -92,12 +93,11 @@ class star():
         # clobber the old file
         if os.path.exists( log_file):
             os.remove( log_file )
-             
+
         logger = logging.getLogger( logger_name )
         logger.setLevel( logging.DEBUG )
         formatter = logging.Formatter(
-            # uncomment below to get line number, but which one?
-            # need to add module name in reports
+            # uncomment below to get line number
             #fmt="%(asctime)s - %(levelname)s - %(lineno)d - %(message)s",
             fmt="%(asctime)s - %(levelname)s - %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S" )
@@ -275,7 +275,7 @@ class star():
         self.logger.info( 'star: using module_path: ' + module_path  )
 
         name = os.path.basename( module_path )
-        self.logger.info( 'star: loading rotor module: ' + module_path )
+        #self.logger.info( 'star: loading rotor module: ' + module_path )
         
         module = self.try_loading( 'dummy', module_path )
         self.logger.info( 'star: using rotor module: ' + module_path  )
@@ -474,7 +474,7 @@ class star():
                            str( self.station.lon) )
 
         try:
-            self.logger.info( 'star: getting station altitude ... ' )
+            #self.logger.info( 'star: getting station altitude ... ' )
             self.station.alt = config.getfloat( 'station', 'altitude' )
             
         except Exception as e:
@@ -501,7 +501,8 @@ class star():
         self.get_read_elevation( config )
         self.get_minimum_zenith( config )
         self.get_number_passes( config )
-        
+
+        self.logger.info( ' ' )
         active = self.get_active_satellites( config )
 
         self.populate_satellites( active, config )
@@ -531,17 +532,18 @@ if __name__ == '__main__':   # user entry point
             eprint( 'star: config file: ' +  config_file + ' does not exist' )
             sys.exit( 1 )
     else:
-        eprint( 'no config file given ... exiting.' )
-        eprint( 'usage:star.py config_file [log_file]' )
+        eprint( 'star: no config file given ... exiting.' )
+        eprint( 'star: usage:star.py config_file [log_file]' )
         sys.exit( 1 )
 
+    star_home = os.environ[ 'STAR_HOME' ]
     if len( sys.argv ) > 2:  # check for log file
-        log_file = sys.argv[2]
+        log_file = star_home + '/log/' + sys.argv[2]
     else:
-        log_file = 'star.log'
+        log_file = star_home + '/log/' + 'star.log'
 
     try:
-        star = star( log_file, config_file ) # instantiate non-graphics worker bee 
+        star = star( log_file, config_file ) # instantiate non-graphics 
 
     except Exception as e:
         message = 'star: check log file "star.log" for details.'
