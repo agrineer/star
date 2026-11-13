@@ -85,7 +85,7 @@ class star():
         self.logger.info( 'star: initializing star version: 2026.000' )
         self.logger.info( 'star: python version = ' + sys.version[0:6] )
 
-        self.myname = os.path.basename(__file__)[:-3] + ': ' 
+        self.myname = os.path.basename(__file__)[:-3] + ': '
         self.configure( config_file )
         
     def setup_logger( self, logger_name, log_file, console ):
@@ -144,22 +144,17 @@ class star():
             try:
                 module = module_from_spec( spec )
                 spec.loader.exec_module( module )
+                
             except Exception as e:
-                eprint( self.myname + e )
-                self.logger.error( e )
-                
-                message = 'star: could not load module: ' + name + \
-                          ' ... exiting'
-                eprint( self.myname + message )
-                self.logger.error( message )
-                
-                sys.exit( 2 )
-                
+                message = 'star: cannot get module from spec ... exiting'
+                self.report_error( e, message )
+                              
             self.logger.info( 'star: dynamically loaded rotor module: ' + name )
             return module
         
         else:
-            message = 'star: could not find rotor module: ' + name + ' ... exiting'
+            message = 'star: could not find rotor module: ' + name \
+                      + ' ... exiting'
             self.logger.error( message )
             eprint( self.myname + message )
             sys.exit( 2 )
@@ -277,7 +272,7 @@ class star():
         name = os.path.basename( module_path )
         #self.logger.info( 'star: loading rotor module: ' + module_path )
         
-        module = self.try_loading( 'dummy', module_path )
+        module = self.try_loading( name, module_path )
         self.logger.info( 'star: using rotor module: ' + module_path  )
 
         el_offset = self.get_rotor_elevation_offset( config )
