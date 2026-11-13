@@ -1,5 +1,5 @@
 '''
-@file dummy.py
+@file stub.py
 @author Scott L. Williams
 @package STaR
 @brief A dummy rotor for STaR
@@ -20,11 +20,11 @@
 #
 
 @section DESCRIPTION
-A dummy rotor for STaR. Exercises STaR for testing purposes. Can also
+A stub rotor for STaR. Exercises STaR for testing purposes. Can also
 write satellite track position to file.
 '''
 
-dummy_copyright = 'dummy.py Copyright (c) 2020-2026 Scott L. Williams, released under GNU GPL V3.0'
+stub_copyright = 'stub.py Copyright (c) 2020-2026 Scott L. Williams, released under GNU GPL V3.0'
 
 import sys
 import time
@@ -35,12 +35,12 @@ from rotor import rotor
 from ezprint import eprint
 from threading import Thread
 
-# return an instance of 'dummy' class 
+# return an instance of 'stub' class 
 # without having to know its name
 def instantiate( name, el_offset, az_offset, lead ):
-    return dummy( name, el_offset, az_offset, lead )
+    return stub( name, el_offset, az_offset, lead )
 
-class dummy( rotor ):
+class stub( rotor ):
     
     def __init__( self, name, el_offset, az_offset, lead ):
 
@@ -63,7 +63,7 @@ class dummy( rotor ):
         self.logger = logging.getLogger( 'star_logger' )
         self.logger.info( name + ': using ' + 'version ' + self.version )
 
-        # set this up for dummy rotor only
+        # set this up for stub rotor only
         self.timer = 0                # used to simulate calibration
         self.calib_duration = 10      # time it takes to calibrate rig
         
@@ -96,15 +96,15 @@ class dummy( rotor ):
         pass
 
     def get_info( self ):
-        return 'dummy rotor version: ' + self.version
+        return 'stub rotor version: ' + self.version
 
     def get_tracker( self, coord ):
-        return( dummy_tracker(self,coord) )
+        return( stub_tracker(self,coord) )
 
-# end class dummy
+# end class stub
 
-# rotor tracker thread; customized tracker for dummy rotors 
-class dummy_tracker( Thread ):
+# rotor tracker thread; customized tracker for stub rotors 
+class stub_tracker( Thread ):
     def __init__ ( self, rotor, coord ):
         Thread.__init__( self )
 
@@ -117,7 +117,7 @@ class dummy_tracker( Thread ):
 
         # use the same logger name
         self.logger = logging.getLogger( 'star_logger' )
-        self.logger.info( 'logger initialized in dummy track' )
+        self.logger.info( 'logger initialized in stub track' )
  
     def stop( self ):
         self.running = False
@@ -152,14 +152,14 @@ class dummy_tracker( Thread ):
                 break
 
         if i == self.num-1:
-            self.logger.warning( 'dummy_track: run: pass coordinates ' +
+            self.logger.warning( 'stub_track: run: pass coordinates ' +
                                  'are in the past. nothing to track. ' +
                                  'exiting tracker thread...' )
             self.running = False
             return               # nothing to do
 
         # go to start position    
-        self.logger.info( 'dummy_track: moving antenna to rise position: ' +   \
+        self.logger.info( 'stub_track: moving antenna to rise position: ' +   \
                           '%5.1f'%self.coord[i][2] + ' ' \
                           '%5.1f'%self.coord[i][3] )
 
@@ -171,7 +171,7 @@ class dummy_tracker( Thread ):
             while self.coord[i][1] < (ephem.now() + lead):
                i += 1
                if i == self.num:    # end of pass coordinates
-                self.logger.info( 'dummy_track: end of satellite pass' )
+                self.logger.info( 'stub_track: end of satellite pass' )
                 self.clean_up()
                 return              # end of thread
 
@@ -187,6 +187,6 @@ class dummy_tracker( Thread ):
 
         self.clean_up()
 
-# end class dummy_tracker
+# end class stub_tracker
 
-# end dummy.py
+# end stub.py
