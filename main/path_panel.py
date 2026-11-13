@@ -133,7 +133,7 @@ class path_panel( wx.Panel ):
                 self.message( 'antenna is tracking; cannot comply',
                               'Antenna Move Request', wx.ICON_EXCLAMATION )
             else:
-                self.logger.info( 'moving antenna to ' + '%.1f'%az +
+                self.logger.info( 'path_panel: moving antenna to ' + '%.1f'%az +
                               ',' + '%.1f'%el )
                 self.rotor.move_azel( az, el )
 

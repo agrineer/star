@@ -157,7 +157,7 @@ class rotor():
     # park the antenna
     def park( self ):
  
-        self.logger.info( 'parking antenna...' )
+        self.logger.info( 'rotor: parking antenna...' )
         self.move_azel( self.az_park, self.el_park )
-        self.logger.info( 'antenna parked' )
+        self.logger.info( 'rotor: antenna parked' )
 

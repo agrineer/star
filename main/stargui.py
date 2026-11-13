@@ -157,7 +157,7 @@ class stargui( wx.Frame ):    # frame container class for stargui window
         self.star.sched.stop()
         self.star.sched.join()
 
-        logging.info( 'exiting program.' )
+        logging.info( 'stargui: exiting program.' )
         event.Skip()
 
     def on_quit( self, event=None ):
@@ -169,7 +169,7 @@ class stargui( wx.Frame ):    # frame container class for stargui window
                           'Cannot Initialize Antenna', wx.ICON_EXCLAMATION )
             return
 
-        logging.info( 'initializing rotors.' )
+        logging.info( 'stargui: initializing rotors' )
 
         self.Enable( False )               # no access to frame
         self.mon_thread.enable( False )    # won't be able to read rotor
@@ -184,7 +184,7 @@ class stargui( wx.Frame ):    # frame container class for stargui window
         self.mon_thread.enable( True )
         self.Enable( True )                # give access to frame
 
-        logging.info( 'rotors initialized.' )
+        logging.info( 'stargui: rotors initialized' )
         
     def on_antenna_park( self, event=None ):
         if self.star.sched.tracking:

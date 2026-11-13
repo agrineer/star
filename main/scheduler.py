@@ -62,7 +62,7 @@ class scheduler( Thread ):
     def print_passes( self, passes ):
         
         n = len( passes[0] )                  # number of coordinate lines
-        self.logger.info( 'next pass: ' + passes[0][0][0] +    \
+        self.logger.info( 'scheduler: next pass: ' + passes[0][0][0] +    \
                           ' rise: '+str( ephem.localtime(passes[0][0][1]) )[:19] + \
                           ' set: '+str( ephem.localtime(passes[0][n-1][1]))[:19] ) 
 
@@ -76,7 +76,8 @@ class scheduler( Thread ):
             eprint( 'ERROR: ' + str(e) )
             self.logger.error( str(e) )
             
-            message = 'get_elements: cannot open ' + sat.tlef + ' ... exiting'
+            message = 'scheduler: get_elements: cannot open ' + \
+                       sat.tlef + ' ... exiting'
             eprint( 'ERROR: ' + message )
             self.logger.error( message )
             sys.exit( 1 )
@@ -92,7 +93,7 @@ class scheduler( Thread ):
             
             line = tle.readline()
             
-        self.logger.error( 'get_elements: cannot find TLEs for ' + sat.name +
+        self.logger.error( 'scheduler: cannot find TLEs for ' + sat.name +
                        ' in file: ' + sat.tlef + ' ... exiting.')
         tle.close()
         sys.exit(1)
@@ -131,9 +132,10 @@ class scheduler( Thread ):
                    (passes[j][0][0] == passes[i][0][0] ):
 
                     # NOTE: utc time, not local time
-                    self.logger.info( 'duplicate pass: ' + passes[j][0][0] + \
-                                  ' ' + str(tr) + ' ' + str(next_tr) + \
-                                  ' ' + str(i) + ' '  + str(j) )
+                    self.logger.info( 'scheduler: duplicate pass: ' +
+                                      passes[j][0][0] + 
+                                      ' ' + str(tr) + ' ' + str(next_tr) +
+                                      ' ' + str(i) + ' '  + str(j) )
 
                     passes.pop(j)          # remove duplicate pass
                     num -= 1               # keep track of pops
@@ -141,7 +143,8 @@ class scheduler( Thread ):
 
                 elif next_tr > tr and next_tr < ts:
 
-                    self.logger.info( passes[j][0][0] + ' overlaps ' + 
+                    self.logger.info( 'scheduler: ' + passes[j][0][0] +
+                                      ' overlaps ' + 
                                   passes[i][0][0] + ' at ' +       
                                   str(ephem.localtime(next_tr))[:19] + 
                                   ', removed from schedule.' )
@@ -273,7 +276,7 @@ class scheduler( Thread ):
                     if not prepositioned:                # preposition antenna
 
                         # start rotor tracking thread
-                        self.logger.info( 'starting tracker thread' )
+                        self.logger.info( 'scheduler: starting tracker thread' )
                         track = self.rotor.get_tracker( self.passes[0] )
                         track.start()
 
@@ -282,7 +285,7 @@ class scheduler( Thread ):
                 if ephem.now() >= srise:               # flag tracking
                     self.tracking = True               
                     prepositioned = False
-                    self.logger.info( 'antenna is tracking...' )
+                    self.logger.info( 'scheduler: antenna is tracking...' )
             else:
                 # we are tracking
 
@@ -294,12 +297,12 @@ class scheduler( Thread ):
                     if el > self.sig_elev:  
                                             
                         # invoke read script
-                        self.logger.info( 'starting signal read command: ' + read )
+                        self.logger.info( 'scheduler: starting signal read command: ' + read )
                         try:
                             p = subprocess.Popen( 'exec ' + read, shell=True )
                         except:
                             # keep going anyway
-                            self.logger.error( 'cannot start signal read' )
+                            self.logger.error( 'scheduler: cannot start signal read' )
                         reading = True
                         sleep(2.0)    # let the motors and threads settle 
                                       # motor ocillations can trigger
@@ -318,21 +321,21 @@ class scheduler( Thread ):
                     #        adjust sig_elev if mode=ZENITH.
                     #        do it outside loop.
                     if el < self.sig_elev:
-                        self.logger.info( 'stopping signal read' )
+                        self.logger.info( 'scheduler: stopping signal read' )
                         try:
                             p.kill()
                             p.wait()
                         except:                            
-                            self.logger.error( 'error in stopping read process' )
+                            self.logger.error( 'scheduler: error in stopping read process' )
                             # keep going
                             
                         # invoke post acquisition processing here
-                        self.logger.info( 'starting processing command: ' + proc )
+                        self.logger.info( 'scheduler: starting processing command: ' + proc )
                         script = proc.split()            # parse out arguments.
                         try:
                             subprocess.Popen( script )   # don't need pid, 
                         except:
-                            self.logger.error( 'cannot start processing' )
+                            self.logger.error( 'scheduler: cannot start processing' )
                             # keep going
 
                         reading = False
@@ -347,7 +350,7 @@ class scheduler( Thread ):
                     p = None
                     
                     # stop rotor tracking thread
-                    self.logger.info( 'stopping tracker thread' )
+                    self.logger.info( 'scheduler: stopping tracker thread' )
                     if track.running == True:
                         track.stop()                   # wait for tracker  
                         track.join()                   # to stop.
