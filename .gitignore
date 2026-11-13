@@ -19,6 +19,6 @@ temp/
 *~
 
 orbits/
-!.gitkeep
+!weather_group.tle
 
 __pycache__/
