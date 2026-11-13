@@ -43,24 +43,20 @@ from monitor import monitor
 from benchtop import benchtop
 
 class stargui( wx.Frame ):    # frame container class for stargui window
-    def __init__(self, config_file, log_file ): 
+    
+    def __init__(self, log_file, config_file ):
+        
         wx.Frame.__init__( self, None, -1, "" )
 
         self.mon_thread = None        # monitor thread
 
         # use command line star class
-        self.star = star()
-        try:
-            self.star.configure( config_file )
-        except Exception as e:
-            eprint( e )
-            err = 'stargui.py: configuration file given: ' + config_file \
-                + ' does not load. exiting program.'
+        self.star = star( log_file, config_file )
 
-            logging.error( err )
-            eprint( err )
-            eprint( 'check log file "star.log" for available details.' )
-            sys.exit(1)
+        # setup the logger
+        # use the logger name: star_logger
+        self.logger = logging.getLogger( 'star_logger' )
+        self.logger.info( 'logger initialized in stargui' )
 
         self.star.start()
 
@@ -248,27 +244,17 @@ if __name__ == '__main__':   # user entry point
                     ' does not exist ... exiting.' )
             sys.exit(1)
     else:
-        eprint('no config file given.' )
-        eprint('usage:stargui.py config_file [log_file]' )
-        sys.exit(1)
+        eprint( 'no config file given ... exiting.' )
+        eprint( 'usage:stargui.py config_file [log_file]' )
+        sys.exit( 1 )
 
     if len( sys.argv ) > 2:  # check for log file
         log_file = sys.argv[2]
     else:
         log_file = 'star.log'
 
-    # start log file
-    logging.basicConfig( filename=log_file, 
-                         filemode='w',
-                         format='%(asctime)s %(message)s', 
-                         datefmt='%y-%m-%d %H:%M:%S -',
-                         level=logging.DEBUG )
-
-    logging.info( 'starting star gui version 2026.000' )
-    logging.info( 'configuration file: ' + config_file )
-
     app = wx.App()        
-    frame = stargui( config_file, log_file )
+    frame = stargui( log_file, config_file  )
     frame.Show()
 
     # spawn a thread to monitor rotor status

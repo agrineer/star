@@ -44,7 +44,9 @@ from ezprint import eprint, eprints
 # methods directly. however this class defines standard methods
 # as to what the rotor modules should be providing 
 class rotor():
-    def __init__( self ):         
+    
+    def __init__( self ):
+
         self.version = None         # rotor version, not star version
         self.name = None            # rotor name
         self.comm_addr = None       # communication address
@@ -65,6 +67,8 @@ class rotor():
         self.el_min = None
         self.el_max = None
 
+        self.logger = None
+        
     # reset rotor software params
     def reset( self ):
         pass                        # may not be required
@@ -73,7 +77,7 @@ class rotor():
         
         message = 'rotor.py: ' + message
         eprint( 'ERROR: ' + message )
-        logging.error( message )
+        self.logger.error( message )
         sys.exit( 1 )
         
     # get rotor calibration status
@@ -152,7 +156,8 @@ class rotor():
 
     # park the antenna
     def park( self ):
-
-        logging.info( 'parking antenna...' )
+ 
+        self.logger.info( 'parking antenna...' )
         self.move_azel( self.az_park, self.el_park )
-        logging.info( 'antenna parked' )
+        self.logger.info( 'antenna parked' )
+

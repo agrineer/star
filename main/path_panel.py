@@ -46,7 +46,11 @@ class path_panel( wx.Panel ):
 
         self.setup()
         self.reset()
-        
+
+        # use the same logger name
+        self.logger = logging.getLogger( 'star_logger' )
+        self.logger.info( 'logger initialized in path_panel' )
+
     def reset( self ):
         az,el = self.rotor.get_azel()
         self.cnv_x,self.cnv_y = self.angles2scrn( az, el ) # from rotor
@@ -129,7 +133,7 @@ class path_panel( wx.Panel ):
                 self.message( 'antenna is tracking; cannot comply',
                               'Antenna Move Request', wx.ICON_EXCLAMATION )
             else:
-                logging.info( 'moving antenna to ' + '%.1f'%az +
+                self.logger.info( 'moving antenna to ' + '%.1f'%az +
                               ',' + '%.1f'%el )
                 self.rotor.move_azel( az, el )
 

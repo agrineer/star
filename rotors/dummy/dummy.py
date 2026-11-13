@@ -41,19 +41,30 @@ def instantiate( name, el_offset, az_offset, lead ):
     return dummy( name, el_offset, az_offset, lead )
 
 class dummy( rotor ):
+    
     def __init__( self, name, el_offset, az_offset, lead ):
 
         rotor.__init__( self )        # initialize base class first
-        self.version = '2020.000'
 
+        self.version = '2020.000'
         self.name = name              # module's name
+        
+        self.el = None
         self.el_offset = el_offset    # elevation offset
-        self.az_offset = az_offset    # azimuth elevation 
+
+        self.az = None
+        self.az_offset = az_offset    # azimuth elevation
+        
         self.lead = lead              # lead time in seconds
         self.el_park = 90.0           # park position
         self.az_park = 0.0
 
-        logging.info( 'using rotor ' + self.name + ' version ' + self.version )
+        # use the same logger name
+        self.logger = logging.getLogger( 'star_logger' )
+        self.logger.info( 'logger initialized in dummy' )
+
+        self.logger.info( 'using rotor ' + self.name +
+                          ' version ' + self.version )
 
         # set this up for dummy rotor only
         self.timer = 0                # used to simulate calibration
@@ -63,9 +74,11 @@ class dummy( rotor ):
         self.timer = 10
 
     def is_calibrating( self ):
+        
         if self.timer > 0:
             self.timer -= 1
             return True
+
         return False
 
     # move to azimuth and elevation positions
@@ -77,12 +90,9 @@ class dummy( rotor ):
         
     # read azimuth and elevation positions
     def get_azel( self  ):
-
-        # adjust according to setup
-        # FIXME: introduce random motion 
+        
         az = self.az - self.az_offset
         el = self.el - self.el_offset
-
         return az, el
 
     def open( self, comm_addr ):
@@ -117,6 +127,7 @@ class dummy_tracker( Thread ):
         self.running = False
 
     def run ( self ):
+        
         self.running = True
         lead = self.rotor.lead*ephem.second
 
@@ -140,16 +151,16 @@ class dummy_tracker( Thread ):
                 break
 
         if i == self.num-1:
-            logging.warning( 'tracker:run: pass coordinates ' +
+            self.logger.warning( 'tracker:run: pass coordinates ' +
                              'are in the past. nothing to track. ' +
                              'exiting tracker thread...' )
             self.running = False
             return               # nothing to do
 
         # go to start position    
-        logging.info( 'moving antenna to rise position: ' +   \
-                      '%5.1f'%self.coord[i][2] + ' ' \
-                      '%5.1f'%self.coord[i][3] )
+        self.logger.info( 'moving antenna to rise position: ' +   \
+                          '%5.1f'%self.coord[i][2] + ' ' \
+                          '%5.1f'%self.coord[i][3] )
 
         self.rotor.move_azel( self.coord[i][2],self.coord[i][3] )
         
@@ -159,7 +170,7 @@ class dummy_tracker( Thread ):
             while self.coord[i][1] < (ephem.now() + lead):
                i += 1
                if i == self.num:    # end of pass coordinates
-                logging.info( 'end of satellite pass' )
+                self.logger.info( 'end of satellite pass' )
                 self.clean_up()
                 return              # end of thread
 
