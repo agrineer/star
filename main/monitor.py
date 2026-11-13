@@ -32,11 +32,14 @@ import os
 import sys
 import time
 import ephem
+import logging
 from threading import Thread
 
 # monitor antenna position on a separate thread
 class monitor( Thread ):
+    
     def __init__ ( self, stargui, log_file ):
+        
         Thread.__init__( self )
         self.running = False
         self.active = True                      # used to suspend monitoring  
@@ -46,6 +49,7 @@ class monitor( Thread ):
         self.log_file = log_file
         self.last_modified = 0
         self.num_messages = 0
+        self.logger = logging.getLogger( 'star_logger' )
 
     def report_messages( self ):
         try:
@@ -59,8 +63,10 @@ class monitor( Thread ):
               wx.CallAfter( self.stargui.benchtop.update_messages, '  ' + line )
               line = file.readline()
         except:
-            eprint( 'report_messages: log file i/o error' )
-
+            message = 'monitor: log file i/o error'
+            eprint( 'WARNING: ' + message )
+            self.logger.warning( message )
+            
     def report_status( self ):
         tracking = self.stargui.star.sched.tracking
         if tracking == True:         # is antenna tracking?

@@ -33,7 +33,7 @@ import sys
 import time
 import logging
 
-from load_module import load_module
+#from load_module import load_module
 
 # our modules
 from star import star
@@ -50,14 +50,10 @@ class stargui( wx.Frame ):    # frame container class for stargui window
 
         self.mon_thread = None        # monitor thread
 
-        # use command line star class
-        self.star = star( log_file, config_file )
-
-        # setup the logger
-        # use the logger name: star_logger
         self.logger = logging.getLogger( 'star_logger' )
-        self.logger.info( 'logger initialized in stargui' )
 
+        # use command line star class
+        self.star = star( log_file, config_file ) # instantiate
         self.star.start()
 
         cfile = os.path.basename( config_file )

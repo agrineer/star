@@ -67,15 +67,15 @@ class rotor():
         self.el_min = None
         self.el_max = None
 
-        self.logger = None
-        
+        self.logger = logging.getLogger( 'star_logger' )
+
     # reset rotor software params
     def reset( self ):
         pass                        # may not be required
 
     def report( self, message ):
         
-        message = 'rotor.py: ' + message
+        message = 'rotor: ' + message
         eprint( 'ERROR: ' + message )
         self.logger.error( message )
         sys.exit( 1 )
@@ -160,4 +160,3 @@ class rotor():
         self.logger.info( 'rotor: parking antenna...' )
         self.move_azel( self.az_park, self.el_park )
         self.logger.info( 'rotor: antenna parked' )
-

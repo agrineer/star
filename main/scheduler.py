@@ -57,7 +57,6 @@ class scheduler( Thread ):
 
         # use the same logger name
         self.logger = logging.getLogger( 'star_logger' )
-        self.logger.info( 'logger initialized in scheduler' )
         
     def print_passes( self, passes ):
         

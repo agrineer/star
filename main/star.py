@@ -32,7 +32,6 @@ import os
 import sys
 import time 
 import logging
-
 import configparser
 from threading import Thread
 from ezprint import eprint, eprints
@@ -81,10 +80,8 @@ class star():
 
         # setup the logger
         self.logger = self.setup_logger( 'star_logger', log_file, False )
-        self.logger.info( 'logger initialized in the main module as "star_logger"' )
 
         self.logger.info( 'star: initializing star version: 2026.000' )
-        self.logger.info( 'star: configuration file: ' + config_file )
         self.logger.info( 'star: python version = ' + sys.version[0:6] )
 
         self.myname = os.path.basename(__file__)[:-3] + ': ' 
@@ -140,7 +137,7 @@ class star():
         # fancier path joining
         mpath = os.path.join(path, f'{name}.py')
 
-        self.logger.info( 'star: locating rotor module file: ' + mpath )
+        #self.logger.info( 'star: locating rotor module file: ' + mpath )
         spec = spec_from_file_location( name, mpath ) # does this throw an exception?
         if spec != None:
  
@@ -171,7 +168,7 @@ class star():
     def get_rotor_lead( self, config ):
 
         try:
-            self.logger.info( 'star: getting rotor response lead time ... ' )
+            #self.logger.info( 'star: getting rotor response lead time ... ' )
             lead = config.getfloat('rotor','lead')
 
         except:
@@ -188,7 +185,7 @@ class star():
     def get_rotor_azimuth_offset( self, config ):
 
         try:
-            self.logger.info( 'star: getting rotor azimuth offset ... ')
+            #self.logger.info( 'star: getting rotor azimuth offset ... ')
             az_offset = config.getfloat('rotor','az_offset')
             
             if az_offset < 0:
@@ -218,7 +215,7 @@ class star():
     def get_rotor_elevation_offset( self, config ):
         
         try:
-            self.logger.info( 'star: getting rotor elevation offset ... ' )
+            #self.logger.info( 'star: getting rotor elevation offset ... ' )
             el_offset = config.getfloat('rotor','el_offset')
             if el_offset < 0:
                 
@@ -259,13 +256,12 @@ class star():
             self.report_error( e, message )
          
         try:
-            self.logger.info( 'star: getting rotor module path ... ' )
+            #self.logger.info( 'star: getting rotor module path ... ' )
             get = config.get( 'rotor','module' )
             module_path = os.path.expandvars( get )
 
             # file path check
-            self.logger.info( 'star: checking if file: ' + module_path +
-                              ' exists ... ' )
+            #self.logger.info( 'star: checking if file: ' + module_path + ' exists ... ' )
             if not os.path.exists( module_path ):
                 message = 'star: rotor module file does not exist ... exiting'
                 eprint( 'ERROR: ' + message )
@@ -301,7 +297,7 @@ class star():
     def get_read_elevation( self, config ):
               
         try:
-            self.logger.info( 'star: getting start read elevation ... ' )
+            #self.logger.info( 'star: getting start read elevation ... ' )
             self.sig_elev = config.getfloat( 'satellites', 'sig_elev' )
             if self.sig_elev < 0:
                 message = 'start read elevation cannot be < 0, given: ' + \
@@ -322,7 +318,7 @@ class star():
     def get_minimum_zenith( self, config ):
                 
         try:
-            self.logger.info( 'star: getting minimum zenith threshold ... ' )
+            #self.logger.info( 'star: getting minimum zenith threshold ... ' )
             self.zenith_min = config.getfloat( 'satellites', 'zenith_min' )
             if self.sig_elev < 0:
                 message = 'star: minimum elevation cannot be < 0, given: ' + \
@@ -342,7 +338,7 @@ class star():
     def get_number_passes( self, config ):
         
         try:
-            self.logger.info( 'star: getting number of passes per satellite ...' )
+            #self.logger.info( 'star: getting number of passes per satellite ...' )
             self.num_passes = int(config.getfloat('satellites','num_passes')) # ??
             
         except:
@@ -357,7 +353,7 @@ class star():
     def get_active_satellites( self, config ):
            
         try:
-            self.logger.info( 'star: getting active satellites ... ' )
+            #self.logger.info( 'star: getting active satellites ... ' )
             slist = config.get( 'satellites', 'active' )
             active = slist.split( ',' )
 
@@ -374,13 +370,14 @@ class star():
 
         try:
             self.logger.info( ' ' )
-            self.logger.info( 'star: getting TLE filename for satellite: ' +
-                              self.sats[index].name + ' ... ' )
+            #self.logger.info( 'star: getting TLE filename for satellite: ' +
+            #                  self.sats[index].name + ' ... ' )
 
             get = config.get( active[index], 'tle_file' )
             self.sats[index].tlef = os.path.expandvars( get )
             
-            self.logger. info( 'star: checking if file: ' + self.sats[index].tlef + ' exists ... ' )
+            #self.logger. info( 'star: checking if file: ' + self.sats[index].tlef +
+            #                   ' exists ... ' )
             
             if not os.path.exists( self.sats[index].tlef ):
                 self.report_error( ' ' +
@@ -408,7 +405,7 @@ class star():
             self.get_tle( i, active, config )
             
             try:
-                self.logger.info( 'star: getting acquistion read signal script filename ... ' )
+                #self.logger.info('star: getting acquisition read signal script filename ... ')
                 get = config.get( active[i],'read_script' )
                 self.sats[i].read = os.path.expandvars( get )
                 
@@ -421,13 +418,17 @@ class star():
                               self.sats[i].read )
             
             try:
-                self.logger.info( 'star: getting post acquistion processing script ... ' )
+                #self.logger.info( 'star: getting post acquistion processing script ... ' )
                 get = config.get( active[i], 'proc_script' )
                 self.sats[i].proc = os.path.expandvars( get )
                 
             except Exception as e:
-                message = 'star: no post acquisition processing script filename given for satellite: ' + \
-                          active[i] + ' ... exiting.'
+                message = 'star: no post acquisition processing script given for satellite: ' \
+                          + active[i]
+                eprint( 'ERROR: ' + message )
+                self.logger.error( message )
+                
+                message = 'star: use the "dummy_process" for no post-processing ... exiting'
                 self.report_error( e, message )
                 
             self.logger.info( 'star: using post acquisition processing script: ' + self.sats[i].proc  )
@@ -440,7 +441,7 @@ class star():
         self.station = station()
         
         try:
-            self.logger.info( 'star: getting ground station name ... ' )
+            #self.logger.info( 'star: getting ground station name ... ' )
             self.station.name = config.get( 'station', 'name' )
             
         except Exception as e:
@@ -451,7 +452,7 @@ class star():
                           self.station.name )
 
         try:
-            self.logger.info( 'star: getting ground station latitude ... ' )
+            #self.logger.info( 'star: getting ground station latitude ... ' )
             self.station.lat = config.getfloat( 'station', 'latitude' )
             
         except Exception as e:
@@ -462,7 +463,7 @@ class star():
                       str( self.station.lat ) )
         
         try:
-            self.logger.info( 'star: getting ground station longtitude ... ' )
+            #self.logger.info( 'star: getting ground station longtitude ... ' )
             self.station.lon = config.getfloat( 'station', 'longitude' )
 
         except Exception as e:
@@ -470,7 +471,7 @@ class star():
             self.report_error( e, message )
             
         self.logger.info( 'star: using ground station longitude = ' +
-                      str( self.station.lon) )
+                           str( self.station.lon) )
 
         try:
             self.logger.info( 'star: getting station altitude ... ' )
@@ -481,7 +482,7 @@ class star():
             self.report_error( e, message )
             
         self.logger.info( 'star: using ground station altitude = ' +
-                      str( self.station.alt ) )
+                          str( self.station.alt ) )
         self.logger.info( ' ' )
         
     def configure( self, config_file ):

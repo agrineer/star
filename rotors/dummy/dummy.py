@@ -61,8 +61,6 @@ class dummy( rotor ):
 
         # use the same logger name
         self.logger = logging.getLogger( 'star_logger' )
-        self.logger.info( 'logger initialized in dummy' )
-
         self.logger.info( 'using rotor ' + self.name +
                           ' version ' + self.version )
 
